@@ -1,0 +1,99 @@
+.header {
+  background: var(--bg-white);
+  border-bottom: 1px solid var(--border-light);
+  padding: 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.header .container {
+  gap: 40px;
+}
+
+.logo {
+  flex-shrink: 0;
+}
+
+.logo a {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--primary-blue);
+  text-decoration: none;
+  letter-spacing: -0.5px;
+}
+
+.nav {
+  display: flex;
+  gap: 32px;
+  flex: 1;
+}
+
+.nav a {
+  color: var(--text-dark);
+  text-decoration: none;
+  font-size: 14px;
+  font-weight: 500;
+  transition: var(--transition);
+  position: relative;
+}
+
+.nav a:hover {
+  color: var(--primary-blue);
+}
+
+.nav a::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--secondary-orange);
+  transition: var(--transition);
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.user-profile {
+  padding: 8px 16px;
+  background: var(--bg-gray);
+  border-radius: 20px;
+  text-decoration: none;
+  color: var(--text-dark);
+  font-size: 14px;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.user-profile:hover {
+  background: var(--primary-blue);
+  color: var(--bg-white);
+}
+
+@media (max-width: 768px) {
+  .header .container {
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+
+  .nav {
+    gap: 16px;
+    flex: 1;
+    order: 3;
+    width: 100%;
+  }
+
+  .header-actions {
+    order: 2;
+  }
+}
