@@ -67,6 +67,17 @@ function BlogsPage() {
 
   const displayBlogs = activeTab === "all" ? blogs : thirdPartyBlogs
 
+  // Helper: Safe author display
+  const getAuthorName = (author) => {
+    if (!author) return "Unknown"
+
+    // If author is a string (e.g., third-party blogs)
+    if (typeof author === "string") return author
+
+    // If author is an object (your own blogs)
+    return author.username || "Unknown"
+  }
+
   return (
     <div className="blogs-page container">
       <div className="blogs-header">
@@ -100,7 +111,13 @@ function BlogsPage() {
               <button
                 key={item}
                 className={`filter-btn ${
-                  activeTab === "all" ? (category === item ? "active" : "") : sourceFilter === item ? "active" : ""
+                  activeTab === "all"
+                    ? category === item
+                      ? "active"
+                      : ""
+                    : sourceFilter === item
+                    ? "active"
+                    : ""
                 }`}
                 onClick={() => {
                   if (activeTab === "all") {
@@ -134,19 +151,29 @@ function BlogsPage() {
                 className="blog-item"
               >
                 <div className="blog-item-image">
-                  <img src={blog.featured_image || "https://via.placeholder.com/400x250"} alt={blog.title} />
+                  <img
+                    src={blog.featured_image || "https://placehold.co/400x250"}
+                    alt={blog.title}
+                  />
                   {activeTab === "third-party" && <span className="source-badge">{blog.source}</span>}
                 </div>
+
                 <div className="blog-item-content">
                   <div className="blog-item-meta">
                     <span className="category-tag">{blog.category}</span>
                     <span className="views">{blog.views} views</span>
                   </div>
+
                   <h3>{blog.title}</h3>
                   <p>{blog.excerpt}</p>
+
                   <div className="blog-item-footer">
-                    <span className="author">{blog.author}</span>
-                    {activeTab === "all" && <span className="likes">{blog.likes?.length || 0} likes</span>}
+                    {/* FIXED AUTHOR LINE */}
+                    <span className="author">{getAuthorName(blog.author)}</span>
+
+                    {activeTab === "all" && (
+                      <span className="likes">{blog.likes?.length || 0} likes</span>
+                    )}
                   </div>
                 </div>
               </Link>
@@ -161,7 +188,10 @@ function BlogsPage() {
               <span className="page-info">
                 Page {page} of {totalPages}
               </span>
-              <button onClick={() => setPage((p) => Math.min(totalPages, p + 1))} disabled={page === totalPages}>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+              >
                 Next
               </button>
             </div>
