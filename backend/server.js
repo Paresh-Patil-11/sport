@@ -5,6 +5,7 @@ import dotenv from "dotenv";
 import { WebSocketServer } from "ws";
 import http from "http";
 import { setupWebSocket } from "./websocket-handler.js";
+import appointmentRoutes from "./routes/appointmentRoutes.js"
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -20,6 +21,7 @@ const server = http.createServer(app);
 const wss = new WebSocketServer({ server });
 
 // Middleware
+app.use("/api/appointments", appointmentRoutes)
 app.use(express.json());
 app.use(
   cors({
