@@ -51,14 +51,13 @@ function Header() {
             >
               Sports
             </Link>
-            {user && (
-              <Link 
-                to="/appointments" 
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
-              >
-                Appointments
-              </Link>
-            )}
+            {/* Always show Appointments link */}
+            <Link 
+              to="/appointments" 
+              className="text-gray-700 hover:text-blue-600 font-medium transition-colors duration-200"
+            >
+              Appointments
+            </Link>
           </nav>
 
           {/* Desktop Auth Buttons */}
@@ -145,15 +144,14 @@ function Header() {
               >
                 Sports
               </Link>
-              {user && (
-                <Link 
-                  to="/appointments" 
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg font-medium"
-                >
-                  Appointments
-                </Link>
-              )}
+              {/* Always show Appointments in mobile menu */}
+              <Link 
+                to="/appointments" 
+                onClick={() => setMobileMenuOpen(false)}
+                className="px-4 py-2 text-gray-700 hover:bg-blue-50 rounded-lg font-medium"
+              >
+                Appointments
+              </Link>
               
               {user ? (
                 <>

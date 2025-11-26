@@ -21,23 +21,6 @@ function AppointmentPage() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
-  if (!user) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4">
-        <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-800 mb-4">Login Required</h2>
-          <p className="text-gray-600 mb-6">Please login to book an appointment</p>
-          <button 
-            onClick={() => navigate("/login")}
-            className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
-          >
-            Go to Login
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   const consultants = [
     {
       type: "cricket",
@@ -78,8 +61,17 @@ function AppointmentPage() {
     "14:00-15:00", "15:00-16:00", "16:00-17:00", "17:00-18:00"
   ]
 
+  // Check if user is logged in before allowing form submission
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    // Redirect to login if not authenticated
+    if (!user || !token) {
+      alert("Please login to book an appointment")
+      navigate("/login", { state: { from: "/appointments" } })
+      return
+    }
+
     setLoading(true)
 
     try {
@@ -95,6 +87,23 @@ function AppointmentPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Handle consultant selection
+  const handleConsultantSelect = (consultantType) => {
+    // If not logged in, show login prompt
+    if (!user) {
+      const confirmLogin = window.confirm(
+        "You need to login to book an appointment. Would you like to login now?"
+      )
+      if (confirmLogin) {
+        navigate("/login", { state: { from: "/appointments" } })
+      }
+      return
+    }
+    
+    // If logged in, allow selection
+    setFormData({ ...formData, consultantType })
   }
 
   if (success) {
@@ -121,6 +130,36 @@ function AppointmentPage() {
           <p className="text-xl text-gray-600">
             Get expert guidance from professional coaches and trainers
           </p>
+          {!user && (
+            <div className="mt-4 bg-yellow-50 border-l-4 border-yellow-400 p-4 max-w-2xl mx-auto">
+              <div className="flex items-center">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-yellow-700">
+                    <span className="font-semibold">Login Required:</span> You need to{" "}
+                    <button 
+                      onClick={() => navigate("/login", { state: { from: "/appointments" } })}
+                      className="underline font-semibold hover:text-yellow-900"
+                    >
+                      login
+                    </button>
+                    {" "}or{" "}
+                    <button 
+                      onClick={() => navigate("/register", { state: { from: "/appointments" } })}
+                      className="underline font-semibold hover:text-yellow-900"
+                    >
+                      create an account
+                    </button>
+                    {" "}to book an appointment.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Consultants Grid */}
@@ -128,7 +167,7 @@ function AppointmentPage() {
           {consultants.map((consultant) => (
             <div
               key={consultant.type}
-              onClick={() => setFormData({ ...formData, consultantType: consultant.type })}
+              onClick={() => handleConsultantSelect(consultant.type)}
               className={`cursor-pointer rounded-xl p-6 transition-all duration-300 transform hover:-translate-y-2 ${
                 formData.consultantType === consultant.type
                   ? `bg-gradient-to-br ${consultant.color} text-white shadow-2xl scale-105`
@@ -147,12 +186,17 @@ function AppointmentPage() {
                   </li>
                 ))}
               </ul>
+              {!user && formData.consultantType === consultant.type && (
+                <div className="mt-4 text-center text-sm opacity-90">
+                  Please login to continue
+                </div>
+              )}
             </div>
           ))}
         </div>
 
-        {/* Booking Form */}
-        {formData.consultantType && (
+        {/* Booking Form - Only show if consultant is selected and user is logged in */}
+        {formData.consultantType && user && (
           <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8">
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Complete Your Booking</h2>
             <form onSubmit={handleSubmit} className="space-y-6">
@@ -265,6 +309,31 @@ function AppointmentPage() {
                 {loading ? "Booking..." : "Confirm Appointment"}
               </button>
             </form>
+          </div>
+        )}
+
+        {/* Show login prompt if consultant selected but not logged in */}
+        {formData.consultantType && !user && (
+          <div className="max-w-3xl mx-auto bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="text-6xl mb-4">🔒</div>
+            <h2 className="text-2xl font-bold text-gray-800 mb-4">Login Required</h2>
+            <p className="text-gray-600 mb-6">
+              Please login or create an account to complete your booking
+            </p>
+            <div className="flex gap-4 justify-center">
+              <button
+                onClick={() => navigate("/login", { state: { from: "/appointments" } })}
+                className="px-8 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors"
+              >
+                Login
+              </button>
+              <button
+                onClick={() => navigate("/register", { state: { from: "/appointments" } })}
+                className="px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
+              >
+                Sign Up
+              </button>
+            </div>
           </div>
         )}
 
