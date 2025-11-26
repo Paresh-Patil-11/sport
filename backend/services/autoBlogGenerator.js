@@ -1,19 +1,51 @@
-// backend/services/autoBlogGenerator.js (IMPROVED VERSION)
+// backend/services/autoBlogGenerator.js - UPDATED WITH DIFFERENT IMAGES
 import axios from "axios"
 import Blog from "../models/Blog.js"
 import User from "../models/User.js"
 
-// API Configuration
 const CRICKET_API_KEY = process.env.CRICKET_API_KEY
 const FOOTBALL_API_KEY = process.env.FOOTBALL_API_KEY
 const PUBG_API_KEY = process.env.PUBG_API_KEY
-
-// Alternative free APIs for better data
 const RAPIDAPI_KEY = process.env.RAPIDAPI_KEY || "your_rapidapi_key_here"
 
-/**
- * Get system bot user for auto-generated blogs
- */
+// Image URLs for different sports and teams
+const SPORT_IMAGES = {
+  cricket: [
+    "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&h=400&fit=crop", // Cricket match
+    "https://images.unsplash.com/photo-1531415074968-036ba1b575da?w=800&h=400&fit=crop", // Cricket stadium
+    "https://images.unsplash.com/photo-1624526267942-ab0ff8a3e972?w=800&h=400&fit=crop", // Cricket bat
+    "https://images.unsplash.com/photo-1593341646782-e0b495cff86d?w=800&h=400&fit=crop", // Cricket ball
+    "https://images.unsplash.com/photo-1612872087720-bb876e2e67d1?w=800&h=400&fit=crop"  // Cricket action
+  ],
+  football: [
+    "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&h=400&fit=crop", // Football match
+    "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=800&h=400&fit=crop", // Football stadium
+    "https://images.unsplash.com/photo-1606925797300-0b35e9d1794e?w=800&h=400&fit=crop", // Football action
+    "https://images.unsplash.com/photo-1553778263-73a83bab9b0c?w=800&h=400&fit=crop", // Football goal
+    "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&h=400&fit=crop"  // Football crowd
+  ],
+  tennis: [
+    "https://images.unsplash.com/photo-1622279457486-62dcc4a431d6?w=800&h=400&fit=crop", // Tennis court
+    "https://images.unsplash.com/photo-1554068865-24cecd4e34b8?w=800&h=400&fit=crop", // Tennis player
+    "https://images.unsplash.com/photo-1595435934249-5df7ed86e1c0?w=800&h=400&fit=crop", // Tennis match
+    "https://images.unsplash.com/photo-1542144582-1ba00456b5e3?w=800&h=400&fit=crop", // Tennis action
+    "https://images.unsplash.com/photo-1617883861744-87ef004d0d9d?w=800&h=400&fit=crop"  // Tennis ball
+  ],
+  pubg: [
+    "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=400&fit=crop", // Gaming
+    "https://images.unsplash.com/photo-1560253023-3ec5d502959f?w=800&h=400&fit=crop", // Esports
+    "https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=800&h=400&fit=crop", // Gaming setup
+    "https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&h=400&fit=crop", // Gaming tournament
+    "https://images.unsplash.com/photo-1552820728-8b83bb6b773f?w=800&h=400&fit=crop"  // Gaming action
+  ]
+}
+
+// Get random image for sport
+function getRandomSportImage(sport) {
+  const images = SPORT_IMAGES[sport] || SPORT_IMAGES.cricket
+  return images[Math.floor(Math.random() * images.length)]
+}
+
 async function getBotUser() {
   try {
     let botUser = await User.findOne({ username: "SportsHub_Bot" })
@@ -36,9 +68,6 @@ async function getBotUser() {
   }
 }
 
-/**
- * Check if blog already exists for this match
- */
 async function blogExistsForMatch(matchId, sport) {
   const existingBlog = await Blog.findOne({
     slug: { $regex: new RegExp(`${sport}-${matchId}`, "i") },
@@ -47,14 +76,10 @@ async function blogExistsForMatch(matchId, sport) {
   return !!existingBlog
 }
 
-// ==================== CRICKET FUNCTIONS (IMPROVED) ====================
+// ==================== CRICKET FUNCTIONS ====================
 
-/**
- * Fetch live cricket matches - Using CricketAPI Free Data (RapidAPI)
- */
 async function fetchLiveCricketMatches() {
   try {
-    // Try RapidAPI Cricket API Free Data first
     const response = await axios.get("https://cricket-api-free-data.p.rapidapi.com/live", {
       headers: {
         'X-RapidAPI-Key': RAPIDAPI_KEY,
@@ -63,19 +88,15 @@ async function fetchLiveCricketMatches() {
     })
 
     if (response.data && response.data.matches) {
-      return response.data.matches.slice(0, 5) // Get 5 matches
+      return response.data.matches.slice(0, 5)
     }
   } catch (error) {
-    console.log("RapidAPI failed, trying alternative...")
+    console.log("RapidAPI failed, using mock data...")
   }
 
-  // Fallback: Generate mock cricket data (for demonstration)
   return generateMockCricketMatches(5)
 }
 
-/**
- * Generate mock cricket matches for testing
- */
 function generateMockCricketMatches(count = 5) {
   const teams = [
     ["India", "Australia"], ["England", "Pakistan"], 
@@ -105,9 +126,6 @@ function generateMockCricketMatches(count = 5) {
   })
 }
 
-/**
- * Generate cricket blog content
- */
 function generateCricketBlogContent(match) {
   const team1 = match.teams && match.teams[0] ? match.teams[0] : "Team 1"
   const team2 = match.teams && match.teams[1] ? match.teams[1] : "Team 2"
@@ -117,43 +135,53 @@ function generateCricketBlogContent(match) {
   const score2 = score[1] || { r: 0, w: 0, o: 0 }
 
   const content = `
-<div class="cricket-blog-content">
-  <h2>🏏 Live Match: ${match.name}</h2>
-  
-  <div class="match-status-banner">
-    <span class="live-indicator">● LIVE</span>
-    <span class="match-type">${match.matchType || "Cricket"}</span>
+<div style="font-family: system-ui, -apple-system, sans-serif; line-height: 1.8; color: #1a202c;">
+  <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 2rem; border-radius: 1rem; margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+      <span style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%; animation: pulse 2s infinite;"></span>
+      <span style="font-weight: 700; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 1px;">LIVE MATCH</span>
+    </div>
+    <h2 style="font-size: 2.5rem; font-weight: 800; margin: 0;">🏏 ${match.name}</h2>
+    <p style="margin-top: 0.5rem; opacity: 0.9;">${match.matchType || "Cricket"} • ${match.venue || "Stadium"}</p>
   </div>
 
-  <div class="score-section">
-    <div class="team-score">
-      <h3>🇮🇳 ${team1}</h3>
-      <div class="score">${score1.r}/${score1.w}</div>
-      <div class="overs">(${score1.o} overs)</div>
+  <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 2rem; align-items: center; background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+    <div style="text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🇮🇳</div>
+      <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem;">${team1}</h3>
+      <div style="font-size: 3rem; font-weight: 800; color: #10b981;">${score1.r}/${score1.w}</div>
+      <div style="color: #6b7280; margin-top: 0.5rem;">(${score1.o} overs)</div>
     </div>
     
-    <div class="vs-divider">VS</div>
+    <div style="font-size: 2rem; font-weight: 700; color: #9ca3af;">VS</div>
     
-    <div class="team-score">
-      <h3>🇦🇺 ${team2}</h3>
-      <div class="score">${score2.r}/${score2.w}</div>
-      <div class="overs">(${score2.o} overs)</div>
+    <div style="text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🇦🇺</div>
+      <h3 style="font-size: 1.5rem; font-weight: 700; color: #7c3aed; margin-bottom: 1rem;">${team2}</h3>
+      <div style="font-size: 3rem; font-weight: 800; color: #8b5cf6;">${score2.r}/${score2.w}</div>
+      <div style="color: #6b7280; margin-top: 0.5rem;">(${score2.o} overs)</div>
     </div>
   </div>
 
-  <div class="match-details">
-    <p><strong>📍 Venue:</strong> ${match.venue || "Cricket Stadium"}</p>
-    <p><strong>🕐 Match Time:</strong> ${match.dateTimeGMT ? new Date(match.dateTimeGMT).toLocaleString() : "Live Now"}</p>
-    <p><strong>🏆 Status:</strong> ${match.status || "Match in Progress"}</p>
+  <div style="background: #f3f4f6; padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937;">📍 Match Details</h3>
+    <div style="display: grid; gap: 0.75rem;">
+      <p style="margin: 0;"><strong>Venue:</strong> ${match.venue || "Cricket Stadium"}</p>
+      <p style="margin: 0;"><strong>Match Type:</strong> ${match.matchType || "T20"}</p>
+      <p style="margin: 0;"><strong>Status:</strong> ${match.status || "Match in Progress"}</p>
+      <p style="margin: 0;"><strong>Time:</strong> ${match.dateTimeGMT ? new Date(match.dateTimeGMT).toLocaleString() : "Live Now"}</p>
+    </div>
   </div>
 
-  <div class="match-description">
-    <h3>Match Highlights</h3>
-    <p>An exciting ${match.matchType || "cricket"} match is currently underway between ${team1} and ${team2}. The match is being played at ${match.venue || "the stadium"} and promises thrilling cricket action.</p>
+  <div style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937;">🎯 Match Highlights</h3>
+    <p style="margin-bottom: 1rem;">An exciting ${match.matchType || "cricket"} match is currently underway between ${team1} and ${team2}. The match is being played at ${match.venue || "the stadium"} and promises thrilling cricket action.</p>
     
-    <p>${team1} has posted ${score1.r} runs for ${score1.w} wickets in ${score1.o} overs, while ${team2} is chasing with ${score2.r} runs on the board for ${score2.w} wickets.</p>
+    <p style="margin-bottom: 1rem;">${team1} has posted <strong>${score1.r} runs</strong> for the loss of <strong>${score1.w} wickets</strong> in ${score1.o} overs, while ${team2} is chasing with <strong>${score2.r} runs</strong> on the board for <strong>${score2.w} wickets</strong>.</p>
     
-    <p class="update-notice">⚡ Live updates - Scores refreshed automatically</p>
+    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-top: 1.5rem;">
+      <p style="margin: 0; font-weight: 600; color: #92400e;">⚡ Live updates - Scores refreshed automatically</p>
+    </div>
   </div>
 </div>
   `
@@ -168,14 +196,10 @@ function generateCricketBlogContent(match) {
   }
 }
 
-// ==================== FOOTBALL FUNCTIONS (IMPROVED) ====================
+// ==================== FOOTBALL FUNCTIONS ====================
 
-/**
- * Fetch live football matches - Using Free API
- */
 async function fetchLiveFootballMatches() {
   try {
-    // Try Free Football API from RapidAPI
     const response = await axios.get("https://free-api-live-football-data.p.rapidapi.com/football-get-live-scores", {
       headers: {
         'X-RapidAPI-Key': RAPIDAPI_KEY,
@@ -190,13 +214,9 @@ async function fetchLiveFootballMatches() {
     console.log("Football API failed, generating mock data...")
   }
 
-  // Fallback: Generate mock football data
   return generateMockFootballMatches(5)
 }
 
-/**
- * Generate mock football matches
- */
 function generateMockFootballMatches(count = 5) {
   const teams = [
     ["Manchester United", "Liverpool"], ["Barcelona", "Real Madrid"],
@@ -226,9 +246,6 @@ function generateMockFootballMatches(count = 5) {
   })
 }
 
-/**
- * Generate football blog content
- */
 function generateFootballBlogContent(match) {
   const homeTeam = match.homeTeam?.name || "Home Team"
   const awayTeam = match.awayTeam?.name || "Away Team"
@@ -236,42 +253,51 @@ function generateFootballBlogContent(match) {
   const awayScore = match.score?.fullTime?.away || 0
 
   const content = `
-<div class="football-blog-content">
-  <h2>⚽ Live Football: ${homeTeam} vs ${awayTeam}</h2>
-  
-  <div class="match-status-banner">
-    <span class="live-indicator">● LIVE</span>
-    <span class="competition">${match.competition?.name || "Football League"}</span>
+<div style="font-family: system-ui, -apple-system, sans-serif; line-height: 1.8; color: #1a202c;">
+  <div style="background: linear-gradient(135deg, #3b82f6 0%, #1e40af 100%); color: white; padding: 2rem; border-radius: 1rem; margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+      <span style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%; animation: pulse 2s infinite;"></span>
+      <span style="font-weight: 700; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 1px;">LIVE MATCH</span>
+    </div>
+    <h2 style="font-size: 2.5rem; font-weight: 800; margin: 0;">⚽ ${homeTeam} vs ${awayTeam}</h2>
+    <p style="margin-top: 0.5rem; opacity: 0.9;">${match.competition?.name || "Football League"} • ${match.venue || "Stadium"}</p>
   </div>
 
-  <div class="score-section">
-    <div class="team-score">
-      <h3>🏠 ${homeTeam}</h3>
-      <div class="score-large">${homeScore}</div>
+  <div style="display: grid; grid-template-columns: 1fr auto 1fr; gap: 2rem; align-items: center; background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+    <div style="text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">🏠</div>
+      <h3 style="font-size: 1.5rem; font-weight: 700; color: #1e40af; margin-bottom: 1rem;">${homeTeam}</h3>
+      <div style="font-size: 4rem; font-weight: 800; color: #3b82f6;">${homeScore}</div>
     </div>
     
-    <div class="time-display">LIVE</div>
+    <div style="font-size: 2rem; font-weight: 700; color: #9ca3af;">-</div>
     
-    <div class="team-score">
-      <h3>✈️ ${awayTeam}</h3>
-      <div class="score-large">${awayScore}</div>
+    <div style="text-align: center;">
+      <div style="font-size: 3rem; margin-bottom: 1rem;">✈️</div>
+      <h3 style="font-size: 1.5rem; font-weight: 700; color: #dc2626; margin-bottom: 1rem;">${awayTeam}</h3>
+      <div style="font-size: 4rem; font-weight: 800; color: #ef4444;">${awayScore}</div>
     </div>
   </div>
 
-  <div class="match-details">
-    <p><strong>🏆 Competition:</strong> ${match.competition?.name || "Football Championship"}</p>
-    <p><strong>📍 Venue:</strong> ${match.venue || "Football Stadium"}</p>
-    <p><strong>🕐 Kick-off:</strong> ${match.utcDate ? new Date(match.utcDate).toLocaleString() : "Now"}</p>
-    <p><strong>⚡ Status:</strong> Match in Progress</p>
+  <div style="background: #f3f4f6; padding: 1.5rem; border-radius: 1rem; margin-bottom: 2rem;">
+    <h3 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937;">🏆 Match Information</h3>
+    <div style="display: grid; gap: 0.75rem;">
+      <p style="margin: 0;"><strong>Competition:</strong> ${match.competition?.name || "Football Championship"}</p>
+      <p style="margin: 0;"><strong>Venue:</strong> ${match.venue || "Football Stadium"}</p>
+      <p style="margin: 0;"><strong>Kick-off:</strong> ${match.utcDate ? new Date(match.utcDate).toLocaleString() : "Live Now"}</p>
+      <p style="margin: 0;"><strong>Status:</strong> Match in Progress</p>
+    </div>
   </div>
 
-  <div class="match-description">
-    <h3>Match Summary</h3>
-    <p>Thrilling ${match.competition?.name || "football"} action as ${homeTeam} hosts ${awayTeam} at ${match.venue || "the stadium"}. The current scoreline stands at ${homeScore}-${awayScore}.</p>
+  <div style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937;">⚡ Match Summary</h3>
+    <p style="margin-bottom: 1rem;">Thrilling ${match.competition?.name || "football"} action as ${homeTeam} hosts ${awayTeam} at ${match.venue || "the stadium"}. The current scoreline stands at <strong>${homeScore}-${awayScore}</strong>.</p>
     
-    <p>This ${match.competition?.name || "league"} encounter promises excitement as both teams battle for crucial points. Follow live updates as the match unfolds.</p>
+    <p style="margin-bottom: 1rem;">This ${match.competition?.name || "league"} encounter promises excitement as both teams battle for crucial points. Follow live updates as the match unfolds.</p>
     
-    <p class="update-notice">⚡ Live match - Score updates in real-time</p>
+    <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 1rem; border-radius: 0.5rem; margin-top: 1.5rem;">
+      <p style="margin: 0; font-weight: 600; color: #1e40af;">⚽ Live match - Score updates in real-time</p>
+    </div>
   </div>
 </div>
   `
@@ -286,19 +312,12 @@ function generateFootballBlogContent(match) {
   }
 }
 
-// ==================== PUBG FUNCTIONS (IMPROVED - MORE BLOGS) ====================
+// ==================== PUBG FUNCTIONS ====================
 
-/**
- * Fetch PUBG data - Generate more diverse content
- */
 async function fetchPubgMatches() {
-  // Since PUBG API has limited live data, generate diverse PUBG content
-  return generatePubgContent(8) // Generate 8 PUBG blogs
+  return generatePubgContent(8)
 }
 
-/**
- * Generate PUBG content (tournaments, matches, updates)
- */
 function generatePubgContent(count = 8) {
   const tournaments = [
     "PUBG Global Championship", "PGC Grand Finals", "PUBG Continental Series",
@@ -308,7 +327,6 @@ function generatePubgContent(count = 8) {
   
   const regions = ["Asia", "Europe", "Americas", "APAC", "EMEA", "Global"]
   const teams = ["Team Liquid", "FaZe Clan", "Gen.G", "DWG KIA", "Nova Esports", "4AM", "ENCE", "Soniqs"]
-  
   const contentTypes = ["tournament", "match", "update", "highlights"]
   
   return Array.from({ length: count }, (_, i) => {
@@ -329,9 +347,6 @@ function generatePubgContent(count = 8) {
   })
 }
 
-/**
- * Generate PUBG blog content with more variety
- */
 function generatePubgBlogContent(item) {
   const titles = {
     tournament: `🎮 ${item.tournament} - ${item.region} Tournament Live`,
@@ -341,66 +356,91 @@ function generatePubgBlogContent(item) {
   }
   
   const content = `
-<div class="pubg-blog-content">
-  <h2>${titles[item.type]}</h2>
-  
-  <div class="tournament-banner">
-    <span class="live-badge">🔴 LIVE</span>
-    <span class="region-badge">${item.region}</span>
+<div style="font-family: system-ui, -apple-system, sans-serif; line-height: 1.8; color: #1a202c;">
+  <div style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 2rem; border-radius: 1rem; margin-bottom: 2rem;">
+    <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem;">
+      <span style="width: 12px; height: 12px; background: #ef4444; border-radius: 50%; animation: pulse 2s infinite;"></span>
+      <span style="font-weight: 700; text-transform: uppercase; font-size: 0.875rem; letter-spacing: 1px;">LIVE TOURNAMENT</span>
+    </div>
+    <h2 style="font-size: 2.5rem; font-weight: 800; margin: 0;">${titles[item.type]}</h2>
+    <p style="margin-top: 0.5rem; opacity: 0.9;">${item.region} Region • ${item.viewers.toLocaleString()} Viewers</p>
   </div>
 
-  <div class="tournament-details">
-    <div class="detail-card">
-      <h4>🏆 Tournament</h4>
-      <p>${item.tournament}</p>
+  <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem;">
+    <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">🏆</div>
+      <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">Tournament</div>
+      <div style="font-weight: 700; color: #1f2937;">${item.tournament}</div>
     </div>
     
-    <div class="detail-card">
-      <h4>💰 Prize Pool</h4>
-      <p>${item.prizePool}</p>
+    <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">💰</div>
+      <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">Prize Pool</div>
+      <div style="font-weight: 700; color: #10b981; font-size: 1.5rem;">${item.prizePool}</div>
     </div>
     
-    <div class="detail-card">
-      <h4>👥 Live Viewers</h4>
-      <p>${item.viewers.toLocaleString()}</p>
+    <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">👥</div>
+      <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">Live Viewers</div>
+      <div style="font-weight: 700; color: #3b82f6; font-size: 1.5rem;">${item.viewers.toLocaleString()}</div>
     </div>
     
-    <div class="detail-card">
-      <h4>🌍 Region</h4>
-      <p>${item.region}</p>
+    <div style="background: white; padding: 1.5rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center;">
+      <div style="font-size: 2rem; margin-bottom: 0.5rem;">🌍</div>
+      <div style="font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem;">Region</div>
+      <div style="font-weight: 700; color: #1f2937;">${item.region}</div>
     </div>
   </div>
 
-  <div class="match-section">
-    <h3>Featured Teams</h3>
-    <div class="teams-grid">
-      <div class="team-card">
-        <h4>🎯 ${item.teams[0]}</h4>
-        <p>Competing for victory</p>
+  <div style="background: white; padding: 2rem; border-radius: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 2rem;">
+    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937;">🎯 Featured Teams</h3>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+      <div style="background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); color: white; padding: 1.5rem; border-radius: 0.75rem; text-align: center;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎮</div>
+        <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">${item.teams[0]}</h4>
+        <p style="margin: 0; opacity: 0.9; font-size: 0.875rem;">Competing for victory</p>
       </div>
-      <div class="team-card">
-        <h4>🎯 ${item.teams[1]}</h4>
-        <p>Fighting for the championship</p>
+      <div style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); color: white; padding: 1.5rem; border-radius: 0.75rem; text-align: center;">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">🎮</div>
+        <h4 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;">${item.teams[1]}</h4>
+        <p style="margin: 0; opacity: 0.9; font-size: 0.875rem;">Fighting for the championship</p>
       </div>
     </div>
   </div>
 
-  <div class="content-section">
-    <h3>Tournament Overview</h3>
-    <p>The ${item.tournament} continues with intense PUBG esports action from the ${item.region} region. Top teams including ${item.teams[0]} and ${item.teams[1]} are battling it out for their share of the ${item.prizePool} prize pool.</p>
+  <div style="background: #f3f4f6; padding: 2rem; border-radius: 1rem;">
+    <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem; color: #1f2937;">📊 Tournament Overview</h3>
+    <p style="margin-bottom: 1rem;">The ${item.tournament} continues with intense PUBG esports action from the ${item.region} region. Top teams including ${item.teams[0]} and ${item.teams[1]} are battling it out for their share of the ${item.prizePool} prize pool.</p>
     
-    <p>This competitive PUBG tournament showcases the best players and strategies in battle royale gaming. With ${item.viewers.toLocaleString()} live viewers tuning in, the excitement is at an all-time high.</p>
+    <p style="margin-bottom: 1rem;">This competitive PUBG tournament showcases the best players and strategies in battle royale gaming. With ${item.viewers.toLocaleString()} live viewers tuning in, the excitement is at an all-time high.</p>
     
-    <h3>What to Expect</h3>
-    <ul>
-      <li>🎮 High-level competitive gameplay</li>
-      <li>🎯 Strategic rotations and positioning</li>
-      <li>⚡ Intense firefights and clutch moments</li>
-      <li>🏆 Championship points on the line</li>
-      <li>💰 Major prize pool distribution</li>
+    <h4 style="font-size: 1.25rem; font-weight: 700; margin: 1.5rem 0 1rem; color: #1f2937;">What to Expect</h4>
+    <ul style="list-style: none; padding: 0; display: grid; gap: 0.75rem;">
+      <li style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.5rem;">🎮</span>
+        <span>High-level competitive gameplay</span>
+      </li>
+      <li style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.5rem;">🎯</span>
+        <span>Strategic rotations and positioning</span>
+      </li>
+      <li style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.5rem;">⚡</span>
+        <span>Intense firefights and clutch moments</span>
+      </li>
+      <li style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.5rem;">🏆</span>
+        <span>Championship points on the line</span>
+      </li>
+      <li style="display: flex; align-items: center; gap: 0.75rem;">
+        <span style="font-size: 1.5rem;">💰</span>
+        <span>Major prize pool distribution</span>
+      </li>
     </ul>
     
-    <p class="update-notice">⚡ Tournament ongoing - Check back for live updates!</p>
+    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 1rem; border-radius: 0.5rem; margin-top: 1.5rem;">
+      <p style="margin: 0; font-weight: 600; color: #92400e;">⚡ Tournament ongoing - Check back for live updates!</p>
+    </div>
   </div>
 </div>
   `
@@ -417,9 +457,6 @@ function generatePubgBlogContent(item) {
 
 // ==================== MAIN GENERATION FUNCTIONS ====================
 
-/**
- * Generate cricket blogs
- */
 async function generateCricketBlogs() {
   try {
     console.log("🏏 Fetching cricket matches...")
@@ -440,7 +477,7 @@ async function generateCricketBlogs() {
           slug: slug,
           author: botUser._id,
           published: true,
-          featured_image: "https://images.unsplash.com/photo-1540747913346-19e32dc3e97e?w=800&h=400&fit=crop"
+          featured_image: getRandomSportImage("cricket")
         })
 
         await blog.save()
@@ -458,9 +495,6 @@ async function generateCricketBlogs() {
   }
 }
 
-/**
- * Generate football blogs
- */
 async function generateFootballBlogs() {
   try {
     console.log("⚽ Fetching football matches...")
@@ -481,7 +515,7 @@ async function generateFootballBlogs() {
           slug: slug,
           author: botUser._id,
           published: true,
-          featured_image: "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?w=800&h=400&fit=crop"
+          featured_image: getRandomSportImage("football")
         })
 
         await blog.save()
@@ -499,9 +533,6 @@ async function generateFootballBlogs() {
   }
 }
 
-/**
- * Generate PUBG blogs - NOW GENERATES 8+
- */
 async function generatePubgBlogs() {
   try {
     console.log("🎮 Generating PUBG content...")
@@ -522,7 +553,7 @@ async function generatePubgBlogs() {
           slug: slug,
           author: botUser._id,
           published: true,
-          featured_image: "https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&h=400&fit=crop"
+          featured_image: getRandomSportImage("pubg")
         })
 
         await blog.save()
@@ -540,9 +571,6 @@ async function generatePubgBlogs() {
   }
 }
 
-/**
- * Archive old blogs (24 hours)
- */
 async function archiveOldBlogs() {
   try {
     const botUser = await User.findOne({ username: "SportsHub_Bot" })
@@ -565,9 +593,6 @@ async function archiveOldBlogs() {
   }
 }
 
-/**
- * Main generation function
- */
 export async function generateAllSportsBlogs() {
   console.log("\n" + "=".repeat(50))
   console.log("🚀 AUTO BLOG GENERATION STARTED")

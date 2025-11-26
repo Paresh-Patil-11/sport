@@ -12,20 +12,23 @@ import UserDashboard from "./pages/UserDashboard"
 import UserProfilePage from "./pages/UserProfilePage"
 import LiveMatchPage from "./pages/LiveMatchPage"
 import AdminDashboard from "./pages/AdminDashboard"
+import SportsPage from "./pages/SportsPage"
+import AppointmentPage from "./pages/AppointmentPage"
 
 function App() {
   return (
     <AuthProvider>
-      <div className="app-container">
+      <div className="min-h-screen flex flex-col bg-gray-50">
         <Header />
-        <main>
+        <main className="flex-1">
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/blogs" element={<BlogsPage />} />
             <Route path="/blog/:slug" element={<BlogDetailPage />} />
-            {/* ❌ Remove third-party route */}
             <Route path="/profile/:userId" element={<UserProfilePage />} />
-            <Route path="/live/:matchId" element={<LiveMatchPage />} />
+            <Route path="/live-scores" element={<LiveMatchPage />} />
+            <Route path="/sports" element={<SportsPage />} />
+            <Route path="/appointments" element={<AppointmentPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/dashboard" element={<UserDashboard />} />
